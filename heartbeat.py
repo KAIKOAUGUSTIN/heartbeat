@@ -1,7 +1,7 @@
 import time
 import requests
 
-URL = "http://193.149.164.213:1372/api/push/PdS2BJzJ4vHlozbbgu6SLCCuaaOzIKPK?status=up&msg=OK&ping=
+URL = "https://status.kaioaugusto.com/api/push/KEoXTMAwvImLkeCp6LVWFgrp1HmquhkO?status=up&msg=OK&ping="
 INTERVAL = 20
 
 while True:
