@@ -2,7 +2,7 @@ import time
 import requests
 
 URL = "https://uptime.betterstack.com/api/v1/heartbeat/j65Zh9SrEgMichFbPyuqjqnE"
-INTERVAL = 20
+INTERVAL = 30
 
 while True:
     start = time.time()
