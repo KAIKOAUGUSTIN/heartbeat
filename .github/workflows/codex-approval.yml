@@ -2,10 +2,8 @@ name: Codex Approval
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
   issue_comment:
-    types: [created]
-  reaction:
     types: [created]
 
 jobs:
@@ -13,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Codex reaction
+      - name: Check Codex 👍
         uses: actions/github-script@v7
         with:
           script: |
@@ -26,7 +24,7 @@ jobs:
             });
 
             const approved = reactions.data.find(r =>
-              r.user.login === "codex" && r.content === "+1"
+              r.user.login.includes("codex") && r.content === "+1"
             );
 
             if (!approved) {
