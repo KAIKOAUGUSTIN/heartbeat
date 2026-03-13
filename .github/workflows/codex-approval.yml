@@ -1,0 +1,34 @@
+name: Codex Approval
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+  reaction:
+    types: [created]
+
+jobs:
+  check-codex:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Codex reaction
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request?.number || context.issue.number;
+
+            const reactions = await github.rest.reactions.listForIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr
+            });
+
+            const approved = reactions.data.find(r =>
+              r.user.login === "codex" && r.content === "+1"
+            );
+
+            if (!approved) {
+              core.setFailed("Codex has not approved with 👍");
+            }
