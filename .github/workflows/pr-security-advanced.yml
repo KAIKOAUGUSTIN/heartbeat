@@ -155,7 +155,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'python', 'javascript' ] # Ajuste consoante as linguagens do seu projeto
+        language: [ 'python' ] # Ajuste consoante as linguagens do seu projeto
     steps:
       - name: Checkout
         uses: actions/checkout@v4
