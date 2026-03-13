@@ -5,6 +5,8 @@ on:
     types: [opened, synchronize, reopened]
   issue_comment:
     types: [created]
+  reaction:
+    types: [created, deleted]
 
 jobs:
   check-codex:
@@ -16,6 +18,7 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request?.number || context.issue.number;
+            const allowedApprovers = ["codex"];
 
             const reactions = await github.rest.reactions.listForIssue({
               owner: context.repo.owner,
@@ -24,7 +27,7 @@ jobs:
             });
 
             const approved = reactions.data.find(r =>
-              r.user.login.includes("codex") && r.content === "+1"
+              allowedApprovers.includes(r.user.login) && r.content === "+1"
             );
 
             if (!approved) {
