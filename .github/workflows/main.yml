@@ -1,0 +1,96 @@
+name: CodeQL & AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+  security-events: write # Necessário para o CodeQL
+
+jobs:
+  # Job 1: Análise do CodeQL (Padrão do GitHub)
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'python' # Altere para a linguagem do seu projeto
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # Job 2: Análise da IA ("Codex")
+  ai-code-review:
+    name: AI Codex Review
+    runs-on: ubuntu-latest
+    needs: codeql-analysis # Só roda se o CodeQL passar (opcional)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para pegar o diff do PR
+
+      - name: Adicionar Reação de Análise (👀)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              content: 'eyes'
+            });
+
+      - name: Extrair Diff do PR
+        id: get_diff
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > pr_diff.txt
+
+      - name: Enviar para Análise do Codex (Script Customizado)
+        id: codex_analysis
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # -------------------------------------------------------------------
+          # AQUI ENTRA O SEU SCRIPT (Python ou Node) QUE CHAMA A API DA IA.
+          # Ele deve ler o pr_diff.txt, enviar para a IA e, se houver sugestões,
+          # usar a API do GitHub para postar comentários na linha específica.
+          # 
+          # Se tudo estiver OK, o script deve retornar exit 0.
+          # Se encontrar erros/criar sugestões, deve retornar exit 1 para falhar o job.
+          # -------------------------------------------------------------------
+          
+          echo "Executando script de análise..."
+          # python script_de_revisao.py pr_diff.txt
+          
+          # Simulando um resultado (mude para a lógica real do seu script)
+          ANALISE_OK=true
+          
+          if [ "$ANALISE_OK" = true ]; then
+            echo "status=ok" >> $GITHUB_OUTPUT
+          else
+            echo "status=issues_found" >> $GITHUB_OUTPUT
+            exit 1 # Falha o job para bloquear o PR
+          fi
+
+      - name: Adicionar Reação de Sucesso (👍)
+        if: steps.codex_analysis.outputs.status == 'ok'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              content: '+1'
+            });
