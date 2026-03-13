@@ -1,1 +1,1 @@
-- A simple hearbeat to check my server status
+- A simple hearbeat to check my server status.
