@@ -5,8 +5,6 @@ on:
     types: [opened, synchronize, reopened]
   issue_comment:
     types: [created]
-  reaction:
-    types: [created, deleted]
 
 jobs:
   check-codex:
@@ -17,13 +15,21 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request?.number || context.issue.number;
             const allowedApprovers = ["codex"];
+
+            const prNumber =
+              context.payload.pull_request?.number ||
+              context.payload.issue?.number;
+
+            if (!prNumber) {
+              core.setFailed("No PR found in context");
+              return;
+            }
 
             const reactions = await github.rest.reactions.listForIssue({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: pr
+              issue_number: prNumber
             });
 
             const approved = reactions.data.find(r =>
