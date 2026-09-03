@@ -1,7 +1,7 @@
 import time
 import requests
 
-URL = "https://uptime.betterstack.com/api/v1/heartbeat/j65Zh9SrEgMichFbPyuqjqnE"
+URL = "https://status.kaioaugusto.com/api/push/6xVlZnGumFCh4vfZ2QGbS2zc8jj4YBIO?status=up&msg=OK&ping="
 INTERVAL = 30
 
 while True:
